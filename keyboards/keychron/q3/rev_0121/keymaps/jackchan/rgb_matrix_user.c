@@ -23,11 +23,15 @@ keypos_t led_index_key_position[DRIVER_LED_TOTAL];
 // Initialise RGB matrix; invert the mapping of g_led_config.matrix_co,
 // so instead of a mapping from key position to led index, we now create
 // led intex to key position.
-void rgb_matrix_init_user(void) {
-    for (uint8_t row = 0; row < MATRIX_ROWS; row++) {
-        for (uint8_t col = 0; col < MATRIX_COLS; col++) {
+void rgb_matrix_init_user(void)
+{
+    for (uint8_t row = 0; row < MATRIX_ROWS; row++)
+    {
+        for (uint8_t col = 0; col < MATRIX_COLS; col++)
+        {
             uint8_t led_index = g_led_config.matrix_co[row][col];
-            if (led_index != NO_LED) {
+            if (led_index != NO_LED)
+            {
                 led_index_key_position[led_index] = (keypos_t){.row = row, .col = col};
             }
         }
@@ -35,47 +39,55 @@ void rgb_matrix_init_user(void) {
 }
 
 // Callback by QMK for advanced indicators
-void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max) {
+void rgb_matrix_indicators_advanced_user(uint8_t led_min, uint8_t led_max)
+{
     uint8_t current_layer = get_highest_layer(layer_state);
-    switch (current_layer) {
-        case MAC_BASE:
-        case WIN_BASE:
+    switch (current_layer)
+    {
+    case MAC_BASE:
+    case WIN_BASE:
+    case WIN_GREEK:
 #ifdef CAPS_LOCK_INDICATOR_COLOR
-            if (host_keyboard_led_state().caps_lock || is_caps_word_on()) {
-                rgb_matrix_set_color_by_keycode(led_min, led_max, current_layer, is_caps_lock_indicator, CAPS_LOCK_INDICATOR_COLOR);
-            }
+        if (host_keyboard_led_state().caps_lock || is_caps_word_on())
+        {
+            rgb_matrix_set_color_by_keycode(led_min, led_max, current_layer, is_caps_lock_indicator, CAPS_LOCK_INDICATOR_COLOR);
+        }
 #endif
-            break;
-        case MAC_FN:
-        case WIN_FN:
+        break;
+    case MAC_FN:
+    case WIN_FN:
 #ifdef FN_LAYER_TRANSPARENT_KEYS_OFF
-            rgb_matrix_set_color_by_keycode(led_min, led_max, current_layer, is_transparent, RGB_OFF);
+        rgb_matrix_set_color_by_keycode(led_min, led_max, current_layer, is_transparent, RGB_OFF);
 #endif
-            break;
+        break;
 
-        case WIN_GREEK:
 #ifdef FN_LAYER_TRANSPARENT_KEYS_OFF
-            rgb_matrix_set_color_by_keycode(led_min, led_max, current_layer, is_not_greek, RGB_OFF);
+        rgb_matrix_set_color_by_keycode(led_min, led_max, current_layer, is_not_greek, RGB_OFF);
 #endif
 #ifdef CAPS_LOCK_INDICATOR_COLOR
-            if (host_keyboard_led_state().caps_lock || is_caps_word_on()) {
-                rgb_matrix_set_color_by_keycode(led_min, led_max, current_layer, is_caps_lock_indicator, CAPS_LOCK_INDICATOR_COLOR);
-            }
+        if (host_keyboard_led_state().caps_lock || is_caps_word_on())
+        {
+            rgb_matrix_set_color_by_keycode(led_min, led_max, current_layer, is_caps_lock_indicator, CAPS_LOCK_INDICATOR_COLOR);
+        }
 #endif
-            break;
+        break;
     }
 }
 
-void rgb_matrix_set_color_by_keycode(uint8_t led_min, uint8_t led_max, uint8_t layer, bool (*is_keycode)(uint16_t), uint8_t red, uint8_t green, uint8_t blue) {
-    for (uint8_t i = led_min; i < led_max; i++) {
+void rgb_matrix_set_color_by_keycode(uint8_t led_min, uint8_t led_max, uint8_t layer, bool (*is_keycode)(uint16_t), uint8_t red, uint8_t green, uint8_t blue)
+{
+    for (uint8_t i = led_min; i < led_max; i++)
+    {
         uint16_t keycode = keymap_key_to_keycode(layer, led_index_key_position[i]);
-        if ((*is_keycode)(keycode)) {
+        if ((*is_keycode)(keycode))
+        {
             rgb_matrix_set_color(i, red, green, blue);
         }
     }
 }
 
-bool is_caps_lock_indicator(uint16_t keycode) {
+bool is_caps_lock_indicator(uint16_t keycode)
+{
 #ifdef CAPS_LOCK_INDICATOR_LIGHT_ALPHAS
     return (KC_A <= keycode && keycode <= KC_Z) || keycode == KC_CAPS || keycode >= QK_UNICODEMAP_PAIR;
 #else
@@ -85,8 +97,9 @@ bool is_caps_lock_indicator(uint16_t keycode) {
 
 bool is_transparent(uint16_t keycode) { return keycode == KC_TRNS; }
 
-bool is_not_greek(uint16_t keycode) {
-    if(get_mods() & MOD_MASK_SHIFT)
+bool is_not_greek(uint16_t keycode)
+{
+    if (get_mods() & MOD_MASK_SHIFT)
         return keycode < QK_UNICODEMAP_PAIR;
     else
         return keycode < QK_UNICODEMAP;
